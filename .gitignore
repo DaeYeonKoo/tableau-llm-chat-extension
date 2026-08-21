@@ -1,0 +1,12 @@
+# tableau-mcp은 공식 오픈소스 클론이라 이 저장소에 안 담음 (README 참고해서 직접 클론)
+tableau-mcp/
+
+node_modules/
+dist/
+build/
+
+.env
+.env.*
+!.env.example
+
+*.log

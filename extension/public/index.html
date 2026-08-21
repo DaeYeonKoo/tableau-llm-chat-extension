@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LLM 챗봇</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">✦</span>
+        <span class="brand-title">데이터 어시스턴트</span>
+      </div>
+      <div id="status-pill" class="status-pill status-pill--connecting">
+        <span class="status-dot"></span>
+        <span id="status-text">연결 중...</span>
+      </div>
+    </header>
+
+    <div id="messages" class="messages">
+      <div id="empty-state" class="empty-state">
+        <div class="empty-state-icon">✦</div>
+        <p class="empty-state-title">무엇이 궁금하신가요?</p>
+        <p class="empty-state-desc">지금 보고 계신 대시보드 데이터에 대해 자유롭게 질문해보세요.</p>
+      </div>
+    </div>
+
+    <form id="chat-form" class="chat-form">
+      <textarea
+        id="chat-input"
+        class="chat-input"
+        rows="1"
+        placeholder="질문을 입력하세요..."
+        disabled
+      ></textarea>
+      <button id="chat-send" class="chat-send" type="submit" disabled aria-label="전송">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="19" x2="12" y2="5"></line>
+          <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <script src="lib/tableau.extensions.1.latest.js"></script>
+  <script src="chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
