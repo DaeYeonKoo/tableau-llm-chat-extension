@@ -108,7 +108,8 @@ list-workbooks의 upstreamDatasources를 확인하라"는 지침이 이미 들�
 2. **서비스 계정 권한 확인**: 대상 데이터소스에 서비스 계정(또는 소속 그룹)의 **API Access + Full
    Data Query/Connect** 권한이 있는지 (데이터소스 우클릭 → Permissions)
 3. **Extension을 대시보드에 추가**: Extension 개체 드래그 → 내 Extensions → `extension/manifest.trex`
-   선택 (사내 배포 시엔 `source-location`의 `localhost:8765`를 실제 호스팅 주소로 바꾼 버전의 manifest 필요)
+   선택 (지금은 Vercel 배포 주소가 이미 들어있음 — 배포 주소가 바뀌면 이 파일의
+   `source-location`도 같이 갱신해야 함)
 4. **테스트**: 챗봇 상태 표시줄에 "권한 범위: <필드명>(<개수>), ..."가 뜨는지 확인 → 실제 데이터
    질문을 던져서 허용 범위 밖 데이터가 안 나오는지 확인
 
@@ -130,21 +131,37 @@ AllowedRegions 워크시트의 컬럼명이 실제 데이터소스 필드명과 
 필드 caption을 `get-datasource-metadata`로 확인해서 워크시트 컬럼명을 맞추세요. (한글/영문 필드명
 혼용 시 특히 자주 남 — 예: 워크시트 컬럼은 "지역"인데 데이터소스 필드는 "Region")
 
+## 배포 구조 (2026-08-21부터)
+
+- **Extension**: Vercel에 정적 배포됨 (`extension/public` 폴더만, HTTPS 확보). 다시 배포하려면
+  `cd extension/public && npx vercel --prod --yes`. 배포 후 `extension/manifest.trex`의
+  `source-location` URL이 실제 배포 주소와 일치하는지 확인.
+- **백엔드 + tableau-mcp**: 이 PC에서 `pm2`로 상시 구동 (`ecosystem.config.js`). Windows 로그인 시
+  자동으로 `pm2 resurrect`가 실행되도록 `pm2-windows-startup`이 레지스트리 Run 키에 등록되어 있음
+  — 단, PC가 로그인 화면에 멈춰있는 동안은(아무도 로그인 안 하면) 안 뜸. 완전 무인 기동이 필요하면
+  Windows 자동 로그인 설정을 추가해야 함.
+
 ### Extension 화면에 "localhost에서 연결을 거부했습니다"
 
-`extension/`(8765) 서버가 안 떠있음. `cd extension && npm start`.
+Vercel에 배포된 걸 쓰는 중이면 이 에러는 안 남(HTTPS 고정 주소라서). 아직 로컬(`localhost:8765`)로
+테스트하는 중이면 `extension/` 서버가 안 떠있는 것 — `cd extension && npm start`.
+
+### 백엔드/tableau-mcp가 죽었거나 응답이 없음
+
+`pm2 status`로 상태 확인. `pm2 restart backend` / `pm2 restart tableau-mcp` / `pm2 logs`로 로그 확인.
+둘 다 통째로 다시 올리려면 `pm2 restart all`.
 
 ### 백엔드가 "답변을 생성하는 중 오류가 발생했습니다"만 반환
 
 십중팔구 tableau-mcp를 재시작했는데 백엔드는 그대로 둔 경우. 백엔드는 tableau-mcp와의 MCP
 연결을 프로세스 시작 시 한 번만 맺고 계속 재사용하기 때문에, **tableau-mcp를 재시작했다면
-백엔드도 반드시 같이 재시작**해야 함.
+백엔드도 반드시 같이 재시작**해야 함 (`pm2 restart tableau-mcp backend` 한 번에).
 
 ### `.env`를 고쳤는데 반영이 안 됨
 
-`tsx watch`는 `src/**` 변경만 감지하고 `.env` 변경은 감지하지 않음. `.env`를 고친 뒤엔 항상
-수동으로 프로세스를 재시작해야 함 (포트 충돌 나면 `Get-NetTCPConnection -LocalPort <port>`로
-기존 프로세스 찾아서 `Stop-Process`).
+pm2로 띄운 프로세스는 `.env` 변경을 자동으로 감지하지 않음. `.env`를 고친 뒤엔 항상
+`pm2 restart <이름>`으로 수동 재시작해야 함. (예전 방식인 `Get-NetTCPConnection -LocalPort <port>`로
+프로세스 찾아서 `Stop-Process`하는 방법은 pm2 도입 후엔 안 씀 — pm2가 바로 다시 살려버림.)
 
 ### 검증 curl에 한글 필드명/값을 넣었더니 "알 수 없는 필드: ." 같은 이상한 에러
 
