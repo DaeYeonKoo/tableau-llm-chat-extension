@@ -19,6 +19,7 @@ TABLEAU_MCP_URL=http://127.0.0.1:3927/tableau-mcp
 # Gemini <-> tableau-mcp 왕복 최대 횟수
 MAX_TOOL_LOOPS=12
 
-# Extension 서버(8765) CORS 허용 origin
-EXTENSION_ORIGIN=http://localhost:8765
+# Extension이 서빙되는 origin (CORS 허용 목록) — 콤마로 여러 개 등록 가능
+# 로컬 테스트용 localhost와 Vercel에 올린 프로덕션 URL을 동시에 넣어두면 편함
+EXTENSION_ORIGINS=http://localhost:8765,https://public-xi-jade.vercel.app
 ```

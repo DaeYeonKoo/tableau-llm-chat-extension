@@ -16,5 +16,9 @@ export const config = {
   geminiModel: process.env.GEMINI_MODEL ?? 'gemini-3.6-flash',
   tableauMcpUrl: process.env.TABLEAU_MCP_URL ?? 'http://127.0.0.1:3927/tableau-mcp',
   maxToolLoops: Number(process.env.MAX_TOOL_LOOPS ?? 12),
-  extensionOrigin: process.env.EXTENSION_ORIGIN ?? 'http://localhost:8765',
+  // 콤마로 여러 origin을 등록할 수 있음 (로컬 개발용 localhost + Vercel에 올린 배포본 등 동시 허용)
+  extensionOrigins: (process.env.EXTENSION_ORIGINS ?? 'http://localhost:8765')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 };

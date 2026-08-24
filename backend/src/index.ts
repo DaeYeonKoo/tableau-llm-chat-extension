@@ -6,7 +6,18 @@ import { groupRlsRouter } from './routes/groupRls.js';
 
 const app = express();
 
-app.use(cors({ origin: config.extensionOrigin }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // origin이 없는 요청(같은 서버 내부 호출, curl 등)은 그대로 허용
+      if (!origin || config.extensionOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS로 차단됨: ${origin}`));
+      }
+    },
+  }),
+);
 app.use(express.json());
 
 app.get('/health', (_req, res) => {

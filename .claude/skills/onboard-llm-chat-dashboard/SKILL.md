@@ -70,6 +70,30 @@ list-workbooks의 upstreamDatasources를 확인하라"는 지침이 이미 들�
   검토했었지만, 이제 필요 없음 — 자유로운 쿼리(query-datasource)가 그대로 되고 RLS도 그대로
   강제되므로 이쪽이 훨씬 낫습니다. `get-view-data`는 화이트리스트에서 계속 빼두세요.
 
+### ⚠️ 예외: 라이브로 연결된 순수 .hyper 파일은 지원 안 함 (정책적으로 범위 제외)
+
+내장 데이터소스가 다 되는 건 아닙니다 — **연결 방식(connectionType)에 따라 Tableau의 콘텐츠
+카탈로그(Metadata API)에 아예 등록이 안 되는 경우가 있고, 이 경우 REST API/VDS 어떤 경로로도
+도달할 방법이 없습니다.** `search-content`로 직접 검증해본 결과:
+
+- 정상 작동하는 임베디드 데이터소스는 `connectionType: "excel-direct"`처럼 카탈로그에
+  `isConnectable: true`로 잡힘.
+- **라이브로 연결된 순수 `.hyper` 파일**은 워크북/뷰는 검색에 잡히지만 데이터소스 자체가 카탈로그
+  검색 결과에 전혀 안 나타남 — `list-workbooks`의 `upstreamDatasources`, `get-workbook`,
+  `search-content` 전부 확인해봤지만 방법이 없었음.
+- 다른 임베디드 데이터소스 중에도 `connectionType: "sqlproxy"`이면서 `isConnectable: false`인
+  사본들이 있었음 — 같은 데이터소스라도 프록시/참조용 사본은 조회 불가능하고, 진짜 연결
+  가능한 사본만 `isConnectable: true`로 잡힘.
+
+**현재 정책: 이런 케이스는 지원 범위에서 제외한다.** 데이터소스를 라이브 `.hyper` 파일 직접
+연결 대신 **추출(Extract)로 전환하거나 카탈로그에 정상 등록되는 연결 방식으로 재게시**하도록
+안내하세요. (원한다면 나중에 다른 방법을 더 찾아볼 수도 있지만, 지금은 작업량 대비 효용이
+낮다고 판단해 보류함.)
+
+새 대시보드를 붙이기 전에 **워크북의 모든 데이터소스가 `search-content`(filter:
+`{contentTypes:['datasource']}`)로 검색됐을 때 `isConnectable: true`로 나오는지 먼저 확인**하는
+걸 체크리스트에 추가하는 게 안전합니다.
+
 ## 새 대시보드 붙이기 체크리스트
 
 1. **AllowedRegions 워크시트 만들기** (대시보드 안, 숨김 처리)
